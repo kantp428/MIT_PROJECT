@@ -7,7 +7,7 @@ import dynamic from "next/dynamic";
 const ThailandMap = dynamic(() => import("@/components/map/ThailandMap"), {
   ssr: false,
   loading: () => (
-    <div className="h-[600px] flex items-center justify-center bg-gray-50 border rounded-xl">
+    <div className="h-150 flex items-center justify-center bg-gray-50 border rounded-xl">
       <p className="animate-pulse">กำลังโหลดแผนที่...</p>
     </div>
   ),
@@ -19,7 +19,7 @@ interface MapWrapperProps {
 
 export default function MapWrapper({ airData }: MapWrapperProps) {
   return (
-    <div className="h-[600px] w-full">
+    <div className="h-150 w-full">
       <ThailandMap airData={airData} />
     </div>
   );

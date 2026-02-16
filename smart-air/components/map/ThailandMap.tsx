@@ -31,11 +31,11 @@ const ThailandMap: React.FC<MapProps> = ({ airData }) => {
   const [zoomLevel, setZoomLevel] = useState(6);
 
   const getAQIColor = (value: number): string => {
-    if (value <= 15) return "#00E400";
-    if (value <= 25) return "#FFFF00";
-    if (value <= 37.5) return "#FF7E00";
-    if (value <= 75) return "#FF0000";
-    return "#8F3F97";
+    if (value <= 15) return "oklch(0.75 0.18 145)";
+    if (value <= 25) return "oklch(0.9 0.15 100)";
+    if (value <= 37.5) return "oklch(0.7 0.18 45)";
+    if (value <= 75) return "oklch(0.6 0.22 25)";
+    return "oklch(0.45 0.15 310)";
   };
 
   // ฟังก์ชันสร้าง Custom Icon ที่มีตัวเลข
