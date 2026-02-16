@@ -5,7 +5,7 @@ import * as L from "leaflet";
 import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import "leaflet/dist/leaflet.css";
-import { MapPin } from "lucide-react";
+import { CloudFog, MapPin } from "lucide-react";
 import { useState } from "react";
 import { renderToString } from "react-dom/server";
 
@@ -32,11 +32,7 @@ const ThailandMap: React.FC<MapProps> = ({ airData }) => {
   const [zoomLevel, setZoomLevel] = useState(6);
 
   // ฟังก์ชันสร้าง Custom Icon ที่มีตัวเลข
-  const createCustomIcon = (
-    stationName: string,
-    pmValue: number,
-    color: string,
-  ) => {
+  const createCustomIcon = (color: string) => {
     const showDetails = zoomLevel >= 10;
 
     return L.divIcon({
@@ -75,12 +71,60 @@ const ThailandMap: React.FC<MapProps> = ({ airData }) => {
           <div key={station.id}>
             <Marker
               position={[station.lat, station.lng]}
-              icon={createCustomIcon(station.name, station.pm25, color)}
+              icon={createCustomIcon(color)}
             >
-              <Popup>
-                <div className="p-1">
-                  <h3 className="font-bold">{station.name}</h3>
-                  <p>PM2.5: {station.pm25} µg/m³</p>
+              <Popup className="station-popup">
+                <div className="flex flex-col gap-3 p-1 min-w-45 bg-white text-slate-900 rounded-lg">
+                  <div className="border-b border-slate-200 pb-2">
+                    <h3 className="font-sans font-bold text-base text-slate-900 leading-none">
+                      {station.name}
+                    </h3>
+                    <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-wider font-medium">
+                      Air Quality Monitoring
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between bg-slate-50 p-2 rounded-lg border border-slate-100">
+                    <div className="flex flex-col">
+                      <span className="text-[13px] font-sans font-medium text-slate-500 uppercase">
+                        PM 2.5
+                      </span>
+                      <div className="flex items-baseline gap-1">
+                        <span className="font-sans font-black text-2xl tracking-tighter text-slate-900 pr-0.5">
+                          {station.pm25}
+                        </span>
+                        <span className="text-[13px] text-slate-500 font-medium">
+                          µg/m³
+                        </span>
+                      </div>
+                    </div>
+
+                    <div
+                      className="size-10 rounded-full flex items-center justify-center shadow-md"
+                      style={{
+                        backgroundColor: getPM25Constant(station.pm25).color,
+                        boxShadow: `0 0 12px ${getPM25Constant(station.pm25).color}50`,
+                      }}
+                    >
+                      <CloudFog className="size-5 text-white" />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <span className="font-sans text-[12px] font-medium text-slate-500 uppercase tracking-tight">
+                      สถานะปัจจุบัน
+                    </span>
+                    <div
+                      className="px-2 py-1 rounded-md text-xs font-sans font-medium text-center border"
+                      style={{
+                        borderColor: getPM25Constant(station.pm25).color,
+                        color: getPM25Constant(station.pm25).color,
+                        backgroundColor: `${getPM25Constant(station.pm25).color}10`,
+                      }}
+                    >
+                      {getPM25Constant(station.pm25).labelTh}
+                    </div>
+                  </div>
                 </div>
               </Popup>
             </Marker>
