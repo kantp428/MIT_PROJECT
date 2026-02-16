@@ -58,8 +58,11 @@ const ThailandMap: React.FC<MapProps> = ({ airData }) => {
     <MapContainer
       center={[13.736, 100.523]}
       zoom={6}
-      // 100vh คือเต็มจอ, ลบออก 80px (สมมติว่าเป็นความสูงของ Header)
-      style={{ height: "calc(100vh - 150px)", width: "100%" }}
+      style={{
+        height: "calc(100vh - 64px)",
+        width: "100%",
+        zIndex: 0,
+      }}
     >
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       <ZoomHandler setZoom={setZoomLevel} />

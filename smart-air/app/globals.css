@@ -176,3 +176,13 @@
     @apply font-mono;
   }
 }
+
+/* Leaflet ใช้อยู่ที่ประมาณ 400-800 */
+[data-sidebar="sidebar"] {
+  z-index: 1000 !important;
+}
+
+/* หากตัวปุ่ม Trigger โดนทับ */
+.sidebar-trigger {
+  z-index: 1001 !important;
+}
