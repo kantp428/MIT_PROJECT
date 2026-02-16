@@ -25,7 +25,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
           {/* 4. Footer (Bottom) */}
           <footer className="border-t p-4 text-center text-sm text-muted-foreground">
-            © 2026 My Awesome App. Built with Shadcn.
+            © 2026 Smart Air (MIT Project). Built with NextJS & Shadcn.
           </footer>
         </div>
       </div>
