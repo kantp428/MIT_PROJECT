@@ -1,4 +1,5 @@
 "use client";
+import { getPM25Constant } from "@/lib/utils";
 import { MapProps } from "@/types/air-quality";
 import * as L from "leaflet";
 import "leaflet-defaulticon-compatibility";
@@ -29,14 +30,6 @@ const ZoomHandler = ({ setZoom }: { setZoom: (z: number) => void }) => {
 
 const ThailandMap: React.FC<MapProps> = ({ airData }) => {
   const [zoomLevel, setZoomLevel] = useState(6);
-
-  const getAQIColor = (value: number): string => {
-    if (value <= 15) return "oklch(0.75 0.18 145)";
-    if (value <= 25) return "oklch(0.9 0.15 100)";
-    if (value <= 37.5) return "oklch(0.7 0.18 45)";
-    if (value <= 75) return "oklch(0.6 0.22 25)";
-    return "oklch(0.45 0.15 310)";
-  };
 
   // ฟังก์ชันสร้าง Custom Icon ที่มีตัวเลข
   const createCustomIcon = (
@@ -76,7 +69,7 @@ const ThailandMap: React.FC<MapProps> = ({ airData }) => {
       <ZoomHandler setZoom={setZoomLevel} />
 
       {airData.map((station) => {
-        const color = getAQIColor(station.pm25);
+        const color = getPM25Constant(station.pm25).color;
 
         return (
           <div key={station.id}>

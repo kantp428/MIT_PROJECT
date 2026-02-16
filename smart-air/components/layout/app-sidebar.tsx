@@ -9,11 +9,12 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Home, MapPinned, Wind } from "lucide-react";
+import { CloudFog, Home, MapPinned, Wind } from "lucide-react";
 
 const items = [
   { title: "Home", url: "/", icon: Home },
   { title: "Map", url: "/map", icon: MapPinned },
+  { title: "Pollution", url: "/pollution", icon: CloudFog },
 ];
 
 export function AppSidebar() {
