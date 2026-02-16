@@ -1,5 +1,6 @@
 "use client";
 
+import { SearchDropdown } from "@/components/search-dropdown";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -29,7 +30,7 @@ import * as React from "react";
 
 export default function PollutionPage() {
   const [search, setSearch] = React.useState("");
-  const [province, setProvince] = React.useState("all");
+  const [selectedProvince, setSelectedProvince] = React.useState("all");
   const debouncedSearch = useDebounce(search, 500);
 
   const mockData: AirStation[] = [
@@ -54,13 +55,21 @@ export default function PollutionPage() {
     // เพิ่มข้อมูลจำลองตรงนี้...
   ];
 
+  const PROVINCES = [
+    { label: "ทั้งหมด", value: "all" },
+    { label: "กรุงเทพมหานคร", value: "กรุงเทพ" },
+    { label: "เชียงใหม่", value: "เชียงใหม่" },
+    { label: "ขอนแก่น", value: "ขอนแก่น" },
+    { label: "ภูเก็ต", value: "ภูเก็ต" },
+  ];
+
   // Logic: Filtering ข้อมูล
   const filteredData = mockData.filter((item) => {
     const matchesSearch = item.name
       .toLowerCase()
       .includes(debouncedSearch.toLowerCase());
     const matchesProvince =
-      province === "all" || item.province.includes(province);
+      selectedProvince === "all" || item.province.includes(selectedProvince);
     return matchesSearch && matchesProvince;
   });
 
@@ -81,16 +90,14 @@ export default function PollutionPage() {
           />
         </div>
 
-        <Select value={province} onValueChange={setProvince}>
-          <SelectTrigger className="w-45">
-            <SelectValue placeholder="เลือกจังหวัด" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">ทั้งหมด</SelectItem>
-            <SelectItem value="กรุงเทพ">กรุงเทพ</SelectItem>
-            <SelectItem value="เชียงใหม่">เชียงใหม่</SelectItem>
-          </SelectContent>
-        </Select>
+        <SearchDropdown
+          options={PROVINCES}
+          value={selectedProvince}
+          onChange={setSelectedProvince}
+          placeholder="ค้นหาจังหวัด..."
+          emptyMessage="ไม่พบจังหวัดที่คุณค้นหา"
+          className="w-72"
+        />
       </div>
 
       {/* --- Table Section --- */}
