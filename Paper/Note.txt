@@ -1,7 +1,6 @@
 Multi-weather variable pm2.5 forecasting
-ปรับปรุงเพิ่มเติม
-- เพิ่ม pm2.5
-- CNN + LSTM
+ใช้ข้อมูล 5 ปี 10 จังหวัด
+
 lat long
 13.606454	99.908612  | ดำเนิน  	|
 14.023984	99.980883  | กำแพงแสน	|
@@ -21,3 +20,4 @@ lat long
 
 ถ้าใช้ Tree ต้อง
 - One hot (location,month)
+- ทำ lag
