@@ -39,13 +39,18 @@ import {
   type PM25Band,
 } from "@/lib/utils";
 import { AirStation } from "@/types/air-quality";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, CloudBackup } from "lucide-react";
+import Link from "next/link";
 import * as React from "react";
 
 interface PollutionTableSectionProps {
   airData: AirStation[];
   title?: string;
   className?: string;
+  selectedProvinces?: string[];
+  onSelectedProvincesChange?: React.Dispatch<React.SetStateAction<string[]>>;
+  selectedStatuses?: string[];
+  onSelectedStatusesChange?: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 interface FilterOption {
@@ -142,7 +147,7 @@ function MultiSelectFilter({
               {triggerContent}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+          <PopoverContent className="w-(--radix-popover-trigger-width) p-0">
             <Command>
               <CommandInput
                 placeholder={searchPlaceholder}
@@ -211,16 +216,27 @@ export function PollutionTableSection({
   airData,
   title = "Air Quality Index Table",
   className,
+  selectedProvinces: controlledSelectedProvinces,
+  onSelectedProvincesChange,
+  selectedStatuses: controlledSelectedStatuses,
+  onSelectedStatusesChange,
 }: PollutionTableSectionProps) {
   const [mounted, setMounted] = React.useState(false);
-  const [search, setSearch] = React.useState("");
-  const [selectedProvinces, setSelectedProvinces] = React.useState<string[]>(
-    [],
-  );
-  const [selectedStatuses, setSelectedStatuses] = React.useState<string[]>([]);
+  const [internalSelectedProvinces, setInternalSelectedProvinces] =
+    React.useState<string[]>([]);
+  const [internalSelectedStatuses, setInternalSelectedStatuses] =
+    React.useState<string[]>([]);
   const [provinceDropdownOpen, setProvinceDropdownOpen] = React.useState(false);
   const [statusDropdownOpen, setStatusDropdownOpen] = React.useState(false);
-  const debouncedSearch = useDebounce(search, 500);
+
+  const selectedProvinces =
+    controlledSelectedProvinces ?? internalSelectedProvinces;
+  const setSelectedProvinces =
+    onSelectedProvincesChange ?? setInternalSelectedProvinces;
+  const selectedStatuses =
+    controlledSelectedStatuses ?? internalSelectedStatuses;
+  const setSelectedStatuses =
+    onSelectedStatusesChange ?? setInternalSelectedStatuses;
 
   React.useEffect(() => {
     setMounted(true);
@@ -262,9 +278,6 @@ export function PollutionTableSection({
   };
 
   const filteredData = airData.filter((item) => {
-    const matchesSearch = item.name
-      .toLowerCase()
-      .includes(debouncedSearch.toLowerCase());
     const matchesProvince =
       selectedProvinces.length === 0 ||
       selectedProvinces.includes(item.province);
@@ -272,7 +285,7 @@ export function PollutionTableSection({
     const matchesStatus =
       selectedStatuses.length === 0 || selectedStatuses.includes(itemStatus);
 
-    return matchesSearch && matchesProvince && matchesStatus;
+    return matchesProvince && matchesStatus;
   });
 
   return (
@@ -281,15 +294,6 @@ export function PollutionTableSection({
         <h1 className="font-sans text-2xl font-bold tracking-tight">{title}</h1>
 
         <div className="flex flex-col gap-4">
-          <div className="flex-1">
-            <Input
-              placeholder="ค้นหาชื่อตำบล/เขต..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="max-w-sm"
-            />
-          </div>
-
           <div className="flex flex-col gap-4 xl:flex-row xl:items-start">
             <MultiSelectFilter
               mounted={mounted}
@@ -326,19 +330,22 @@ export function PollutionTableSection({
             <TableHeader>
               <TableRow className="bg-muted/50">
                 <TableHead className="w-25">ID</TableHead>
-                <TableHead>พื้นที่</TableHead>
                 <TableHead>จังหวัด</TableHead>
                 <TableHead className="text-center">PM2.5 (µg/m³)</TableHead>
-                <TableHead>อัปเดตล่าสุด</TableHead>
+                <TableHead className="text-center">อัปเดตล่าสุด</TableHead>
+                <TableHead className="text-center">ข้อมูลย้อนหลัง</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredData.length > 0 ? (
                 filteredData.map((item) => (
                   <TableRow key={item.id}>
-                    <TableCell className="font-mono text-xs">{item.id}</TableCell>
-                    <TableCell className="font-medium">{item.name}</TableCell>
-                    <TableCell className="font-medium">{item.province}</TableCell>
+                    <TableCell className="font-mono text-xs">
+                      {item.id}
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {item.province}
+                    </TableCell>
                     <TableCell className="text-center">
                       <div className="inline-flex items-center gap-2">
                         <Tooltip>
@@ -346,7 +353,8 @@ export function PollutionTableSection({
                             <div
                               className="size-3 rounded-full shadow-inner"
                               style={{
-                                backgroundColor: getPM25Constant(item.pm25).color,
+                                backgroundColor: getPM25Constant(item.pm25)
+                                  .color,
                               }}
                             />
                           </TooltipTrigger>
@@ -357,8 +365,15 @@ export function PollutionTableSection({
                         <span className="font-bold">{item.pm25}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
+                    <TableCell className="text-center text-sm text-muted-foreground">
                       {item.lastUpdated}
+                    </TableCell>
+                    <TableCell className="text-center text-sm text-muted-foreground">
+                      <Button variant="ghost" size="icon" asChild>
+                        <Link href={`/map/7-past/${item.id}`}>
+                          <CloudBackup />
+                        </Link>
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))
