@@ -1,5 +1,6 @@
 "use client";
 
+import MapLegend from "@/components/map/map-legend";
 import MapWrapper from "@/components/map/MapWrapper";
 import { PollutionTableSection } from "@/components/pollution/pollution-table-section";
 import { MOCK_AIR_STATIONS } from "@/lib/mock-air-stations";
@@ -12,6 +13,8 @@ export default function MainPage() {
       <div className="overflow-hidden rounded-2xl shadow-lg">
         <MapWrapper airData={MOCK_AIR_STATIONS} />
       </div>
+
+      <MapLegend />
 
       <PollutionTableSection
         airData={MOCK_AIR_STATIONS}
