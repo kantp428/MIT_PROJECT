@@ -1,33 +1,22 @@
+"use client";
+
 import MapWrapper from "@/components/map/MapWrapper";
-import { AirStation } from "@/types/air-quality";
+import { PollutionTableSection } from "@/components/pollution/pollution-table-section";
+import { MOCK_AIR_STATIONS } from "@/lib/mock-air-stations";
 
 export default function MainPage() {
-  const mockData: AirStation[] = [
-    {
-      id: 1,
-      name: "เขตพญาไท",
-      lat: 13.78,
-      lng: 100.54,
-      pm25: 38,
-      lastUpdated: "2026-02-16",
-    },
-    {
-      id: 2,
-      name: "อ.เมือง เชียงใหม่",
-      lat: 18.79,
-      lng: 98.98,
-      pm25: 82,
-      lastUpdated: "2026-02-16",
-    },
-  ];
-
   return (
-    <main className="max-w-7xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Air Quality Monitoring</h1>
+    <main className="mx-auto max-w-7xl p-6">
+      <h1 className="mb-6 text-3xl font-bold">Air Quality Monitoring</h1>
 
-      <div className="rounded-2xl shadow-lg overflow-hidden">
-        <MapWrapper airData={mockData} />
+      <div className="overflow-hidden rounded-2xl shadow-lg">
+        <MapWrapper airData={MOCK_AIR_STATIONS} />
       </div>
+
+      <PollutionTableSection
+        airData={MOCK_AIR_STATIONS}
+        className="px-0 pb-0"
+      />
     </main>
   );
 }
