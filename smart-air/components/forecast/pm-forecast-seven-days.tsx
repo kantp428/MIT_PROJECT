@@ -50,12 +50,6 @@ export function PMForecastSevenDays({
   const todayIndex = Math.floor(visibleItems.length / 2);
   const today = visibleItems[todayIndex];
 
-  if (visibleItems.length === 0 || !today) {
-    return null;
-  }
-
-  const range = `${visibleItems[0].date} - ${visibleItems[visibleItems.length - 1].date}`;
-
   const scrollToCard = (card: HTMLElement | null) => {
     const container = scrollContainerRef.current;
 
@@ -71,6 +65,26 @@ export function PMForecastSevenDays({
       behavior: "smooth",
     });
   };
+
+  useEffect(() => {
+    if (!todayCardRef.current) {
+      return;
+    }
+
+    const frameId = window.requestAnimationFrame(() => {
+      scrollToCard(todayCardRef.current);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+    };
+  }, [forecastItem.locationId, today?.isoDate, visibleItems.length]);
+
+  if (visibleItems.length === 0 || !today) {
+    return null;
+  }
+
+  const range = `${visibleItems[0].date} - ${visibleItems[visibleItems.length - 1].date}`;
 
   const scrollByCards = (direction: "left" | "right") => {
     const container = scrollContainerRef.current;

@@ -109,7 +109,7 @@ export function PollutionTableSection({
                     </TableCell>
                     <TableCell className="text-center text-sm text-muted-foreground">
                       <Button variant="ghost" size="icon" asChild>
-                        <Link href={`/map/7-past/${item.id}`}>
+                        <Link href={`/pollution/detail/${item.id}`}>
                           <CalendarClock />
                         </Link>
                       </Button>

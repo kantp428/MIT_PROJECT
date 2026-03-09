@@ -9,13 +9,12 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { CloudFog, Home, MapPinned, Wind ,BadgeInfo} from "lucide-react";
+import { CloudFog, Home, MapPinned, Wind, BadgeInfo } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const items = [
   { title: "Home", url: "/", icon: Home },
-  { title: "Map", url: "/map", icon: MapPinned },
   { title: "Pollution", url: "/pollution", icon: CloudFog },
   { title: "information", url: "/information", icon: BadgeInfo },
 ];
