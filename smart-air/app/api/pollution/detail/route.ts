@@ -1,6 +1,23 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { FALLBACK_DETAIL_MAP } from "@/lib/forecast-sample";
+
+interface ActualDetailRow {
+  date: string;
+  pm: Prisma.Decimal | null;
+  temp: Prisma.Decimal | null;
+  humidity: number | null;
+  wind_speed: Prisma.Decimal | null;
+}
+
+interface PredictedDetailRow {
+  date: string;
+  pm_predicted: Prisma.Decimal | null;
+  temp: Prisma.Decimal | null;
+  humidity: number | null;
+  wind_speed: Prisma.Decimal | null;
+}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -29,11 +46,18 @@ export async function GET(request: Request) {
 
   try {
     if (type === "ACTUAL") {
-      const actual = await prisma.pm_actual.findUnique({
-        where: {
-          id,
-        },
-      });
+      const actualRows = await prisma.$queryRaw<ActualDetailRow[]>(Prisma.sql`
+        SELECT
+          date::text AS date,
+          pm,
+          temp,
+          humidity,
+          wind_speed
+        FROM pm_actual
+        WHERE id = ${id}
+        LIMIT 1
+      `);
+      const actual = actualRows[0];
 
       if (!actual) {
         return NextResponse.json(
@@ -43,7 +67,7 @@ export async function GET(request: Request) {
       }
 
       return NextResponse.json({
-        date: actual.date.toISOString().slice(0, 10),
+        date: actual.date,
         pm: actual.pm === null ? null : Number(actual.pm),
         temp: actual.temp === null ? null : Number(actual.temp),
         humidity: actual.humidity ?? null,
@@ -53,11 +77,20 @@ export async function GET(request: Request) {
     }
 
     if (type === "PREDICTED") {
-      const prediction = await prisma.pm_prediction.findUnique({
-        where: {
-          id,
-        },
-      });
+      const predictionRows = await prisma.$queryRaw<PredictedDetailRow[]>(
+        Prisma.sql`
+          SELECT
+            predicted_for::text AS date,
+            pm_predicted,
+            temp,
+            humidity,
+            wind_speed
+          FROM pm_prediction
+          WHERE id = ${id}
+          LIMIT 1
+        `,
+      );
+      const prediction = predictionRows[0];
 
       if (!prediction) {
         return NextResponse.json(
@@ -67,7 +100,7 @@ export async function GET(request: Request) {
       }
 
       return NextResponse.json({
-        date: prediction.predicted_for.toISOString().slice(0, 10),
+        date: prediction.date,
         pm:
           prediction.pm_predicted === null
             ? null

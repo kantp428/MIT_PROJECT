@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { FALLBACK_FORECAST } from "@/lib/forecast-sample";
 
@@ -55,6 +56,18 @@ const buildForecastItem = (
   trend,
 });
 
+interface ActualRow {
+  id: number;
+  date_text: string;
+  pm: Prisma.Decimal | null;
+}
+
+interface PredictedRow {
+  id: number;
+  predicted_for_text: string;
+  pm_predicted: Prisma.Decimal | null;
+}
+
 export async function GET(
   _: Request,
   { params }: { params: Promise<{ locationId: string }> },
@@ -104,42 +117,41 @@ export async function GET(
     yesterday.setDate(today.getDate() - 1);
     const predictedEnd = new Date(today);
     predictedEnd.setDate(today.getDate() + 6);
+    const actualStartText = formatIsoDate(actualStart);
+    const yesterdayText = formatIsoDate(yesterday);
+    const todayText = formatIsoDate(today);
+    const predictedEndText = formatIsoDate(predictedEnd);
 
-    const actualRows = await prisma.pm_actual.findMany({
-      where: {
-        location_id: locationId,
-        date: {
-          gte: actualStart,
-          lte: yesterday,
-        },
-      },
-      orderBy: {
-        date: "asc",
-      },
-    });
+    const actualRows = await prisma.$queryRaw<ActualRow[]>(Prisma.sql`
+      SELECT
+        id,
+        date::text AS date_text,
+        pm
+      FROM pm_actual
+      WHERE location_id = ${locationId}
+        AND date BETWEEN ${actualStartText}::date AND ${yesterdayText}::date
+      ORDER BY date ASC
+    `);
 
-    const predictedRows = await prisma.pm_prediction.findMany({
-      where: {
-        pm_actual: {
-          location_id: locationId,
-          date: yesterday,
-        },
-        predicted_for: {
-          gte: today,
-          lte: predictedEnd,
-        },
-      },
-      orderBy: {
-        predicted_for: "asc",
-      },
-    });
+    const predictedRows = await prisma.$queryRaw<PredictedRow[]>(Prisma.sql`
+      SELECT
+        p.id,
+        p.predicted_for::text AS predicted_for_text,
+        p.pm_predicted
+      FROM pm_prediction p
+      INNER JOIN pm_actual a ON a.id = p.pm_actual_id
+      WHERE a.location_id = ${locationId}
+        AND a.date = ${yesterdayText}::date
+        AND p.predicted_for BETWEEN ${todayText}::date AND ${predictedEndText}::date
+      ORDER BY p.predicted_for ASC
+    `);
 
     const actualMap = new Map(
-      actualRows.map((row) => [formatIsoDate(row.date), row]),
+      actualRows.map((row) => [row.date_text, row]),
     );
 
     const predictedMap = new Map(
-      predictedRows.map((row) => [formatIsoDate(row.predicted_for), row]),
+      predictedRows.map((row) => [row.predicted_for_text, row]),
     );
 
     const actualItems = [];

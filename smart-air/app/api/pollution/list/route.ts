@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import type {
   PollutionPredictionResponse,
@@ -13,6 +14,24 @@ const parsePositiveInt = (value: string | null, fallback: number) => {
 
   return fallback;
 };
+
+const formatIsoDate = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+};
+
+interface PollutionListRow {
+  id: number;
+  province_name: string;
+  pm_predicted: Prisma.Decimal | null;
+  predicted_at: Date;
+  latitude: Prisma.Decimal | null;
+  longitude: Prisma.Decimal | null;
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -32,46 +51,37 @@ export async function GET(request: Request) {
     );
     const yesterdayDate = new Date(todayDate);
     yesterdayDate.setDate(todayDate.getDate() - 1);
+    const todayText = formatIsoDate(todayDate);
+    const yesterdayText = formatIsoDate(yesterdayDate);
 
-    const whereClause = {
-      date: yesterdayDate,
-      pm_prediction: {
-        some: {
-          predicted_for: todayDate,
-        },
-      },
-    };
+    const totalResult = await prisma.$queryRaw<Array<{ total: bigint | number }>>(
+      Prisma.sql`
+        SELECT COUNT(*) AS total
+        FROM pm_actual a
+        INNER JOIN pm_prediction p ON p.pm_actual_id = a.id
+        WHERE a.date = ${yesterdayText}::date
+          AND p.predicted_for = ${todayText}::date
+      `,
+    );
+    const total = Number(totalResult[0]?.total ?? 0);
 
-    const total = await prisma.pm_actual.count({ where: whereClause });
-    const actuals = await prisma.pm_actual.findMany({
-      where: whereClause,
-      include: {
-        location: {
-          select: {
-            id: true,
-            province: true,
-            latitude: true,
-            longitude: true,
-          },
-        },
-        pm_prediction: {
-          where: {
-            predicted_for: todayDate,
-          },
-          orderBy: {
-            predicted_at: "asc",
-          },
-          take: 1,
-        },
-      },
-      orderBy: {
-        location: {
-          province: "asc",
-        },
-      },
-      skip: (normalizedPage - 1) * normalizedLimit,
-      take: normalizedLimit,
-    });
+    const rowsResult = await prisma.$queryRaw<PollutionListRow[]>(Prisma.sql`
+      SELECT
+        l.id,
+        l.province AS province_name,
+        p.pm_predicted,
+        p.predicted_at,
+        l.latitude,
+        l.longitude
+      FROM pm_actual a
+      INNER JOIN location l ON l.id = a.location_id
+      INNER JOIN pm_prediction p ON p.pm_actual_id = a.id
+      WHERE a.date = ${yesterdayText}::date
+        AND p.predicted_for = ${todayText}::date
+      ORDER BY l.province ASC
+      LIMIT ${normalizedLimit}
+      OFFSET ${(normalizedPage - 1) * normalizedLimit}
+    `);
 
     const formatPredictedAt = (date: Date): string => {
       const diffMs = Date.now() - date.getTime();
@@ -86,35 +96,17 @@ export async function GET(request: Request) {
         .replace("T", " ");
     };
 
-    const rows = actuals
-      .map((actual) => {
-        const prediction = actual.pm_prediction[0];
-        if (!prediction) return null;
-
-        return {
-          id: actual.location.id,
-          provinceName: actual.location.province,
-          PM25:
-            prediction.pm_predicted !== null
-              ? Math.round(Number(prediction.pm_predicted) * 100) / 100
-              : null,
-          predicted_at: formatPredictedAt(prediction.predicted_at),
-          latitude:
-            actual.location.latitude !== null
-              ? Number(actual.location.latitude)
-              : null,
-          longitude:
-            actual.location.longitude !== null
-              ? Number(actual.location.longitude)
-              : null,
-        };
-      })
-      .filter(
-        (item): item is PollutionPredictionRow =>
-          item !== null &&
-          item.provinceName !== undefined &&
-          item.predicted_at !== undefined,
-      );
+    const rows: PollutionPredictionRow[] = rowsResult.map((row) => ({
+      id: row.id,
+      provinceName: row.province_name,
+      PM25:
+        row.pm_predicted !== null
+          ? Math.round(Number(row.pm_predicted) * 100) / 100
+          : null,
+      predicted_at: formatPredictedAt(row.predicted_at),
+      latitude: row.latitude !== null ? Number(row.latitude) : null,
+      longitude: row.longitude !== null ? Number(row.longitude) : null,
+    }));
 
     const pagination = {
       total,
