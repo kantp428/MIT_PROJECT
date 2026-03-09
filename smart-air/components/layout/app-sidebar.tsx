@@ -10,6 +10,8 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { CloudFog, Home, MapPinned, Wind } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const items = [
   { title: "Home", url: "/", icon: Home },
@@ -18,11 +20,12 @@ const items = [
 ];
 
 export function AppSidebar() {
+  const pathname = usePathname();
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="py-4">
         <div
-          className="flex items-center gap-3 px-2 
+          className="flex items-center gap-3 px-2
           transition-all duration-300
           group-data-[state=collapsed]:justify-center group-data-[state=collapsed]:px-0 w-full"
         >
@@ -34,7 +37,7 @@ export function AppSidebar() {
           </div>
 
           <span
-            className="font-sans font-bold text-xl tracking-tight whitespace-nowrap 
+            className="font-sans font-bold text-xl tracking-tight whitespace-nowrap
             transition-all duration-300 ease-in-out
             group-data-[state=collapsed]:hidden"
           >
@@ -47,16 +50,27 @@ export function AppSidebar() {
           <SidebarGroupLabel>Application</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild tooltip={item.title}>
-                    <a href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {items.map((item) => {
+                const isActive =
+                  item.url === "/"
+                    ? pathname === "/"
+                    : pathname === item.url ||
+                      pathname.startsWith(`${item.url}/`);
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      tooltip={item.title}
+                      isActive={isActive}
+                    >
+                      <Link href={item.url}>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
