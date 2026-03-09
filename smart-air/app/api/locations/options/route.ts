@@ -13,10 +13,12 @@ export async function GET() {
       },
     });
 
-    const options = locations.map((location) => ({
-      value: String(location.id),
-      label: location.province,
-    }));
+    const options = locations.map(
+      (location: { id: number; province: string }) => ({
+        value: String(location.id),
+        label: location.province,
+      }),
+    );
 
     return NextResponse.json(options);
   } catch (error) {
