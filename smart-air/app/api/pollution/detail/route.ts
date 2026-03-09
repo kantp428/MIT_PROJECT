@@ -14,9 +14,6 @@ interface ActualDetailRow {
 interface PredictedDetailRow {
   date: string;
   pm_predicted: Prisma.Decimal | null;
-  temp: Prisma.Decimal | null;
-  humidity: number | null;
-  wind_speed: Prisma.Decimal | null;
 }
 
 export async function GET(request: Request) {
@@ -81,10 +78,7 @@ export async function GET(request: Request) {
         Prisma.sql`
           SELECT
             predicted_for::text AS date,
-            pm_predicted,
-            temp,
-            humidity,
-            wind_speed
+            pm_predicted
           FROM pm_prediction
           WHERE id = ${id}
           LIMIT 1
@@ -105,10 +99,9 @@ export async function GET(request: Request) {
           prediction.pm_predicted === null
             ? null
             : Number(prediction.pm_predicted),
-        temp: prediction.temp === null ? null : Number(prediction.temp),
-        humidity: prediction.humidity ?? null,
-        wind_speed:
-          prediction.wind_speed === null ? null : Number(prediction.wind_speed),
+        temp: null,
+        humidity: null,
+        wind_speed: null,
       });
     }
 

@@ -39,6 +39,7 @@ export function PollutionDayDetailDialog({
     data?.pm === null || data?.pm === undefined
       ? null
       : getPM25Constant(data.pm);
+  const isPredicted = type === "PREDICTED";
 
   const metrics = [
     {
@@ -83,7 +84,9 @@ export function PollutionDayDetailDialog({
         <DialogHeader className="sr-only">
           <DialogTitle>Pollution Detail</DialogTitle>
           <DialogDescription>
-            PM2.5 and weather summary for the selected day.
+            {isPredicted
+              ? "PM2.5 summary for the selected predicted day."
+              : "PM2.5 and weather summary for the selected day."}
           </DialogDescription>
         </DialogHeader>
 
@@ -135,7 +138,7 @@ export function PollutionDayDetailDialog({
             ) : null}
             {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
-            {!isLoading && !error && data ? (
+            {!isLoading && !error && data && !isPredicted ? (
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 {metrics.map((field) => {
                   const Icon = field.icon;
