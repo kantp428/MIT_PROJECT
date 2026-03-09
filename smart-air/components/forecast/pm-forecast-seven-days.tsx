@@ -42,7 +42,6 @@ export function WeatherForecastSevenDays({
   const visibleItems = selectedForecast?.data.slice(0, 7) ?? [];
   const today = visibleItems[0];
 
-  console.log(provinceId,selectedForecast,visibleItems.length,today)
 
   if (!provinceId || !selectedForecast || visibleItems.length === 0 || !today) {
     return null;
