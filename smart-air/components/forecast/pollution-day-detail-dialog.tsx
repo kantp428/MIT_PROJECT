@@ -77,7 +77,7 @@ export function PollutionDayDetailDialog({
         </Button>
       </DialogTrigger>
       <DialogContent
-        className="top-4 right-4 left-auto translate-x-0 translate-y-0 max-w-[380px] overflow-hidden rounded-2xl border-0 p-0 shadow-2xl sm:top-6 sm:right-6"
+        className="top-4 right-4 left-auto translate-x-0 translate-y-0 max-w-95 overflow-hidden rounded-2xl border-0 p-0 shadow-2xl sm:top-6 sm:right-6"
         closeButtonClassName="top-3 right-3 rounded-full bg-white/14 p-1.5 text-white opacity-100 hover:bg-white/20 hover:text-white [&_svg:not([class*='size-'])]:size-6"
       >
         <DialogHeader className="sr-only">

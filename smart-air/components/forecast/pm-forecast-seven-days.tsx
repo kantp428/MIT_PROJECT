@@ -50,24 +50,6 @@ export function PMForecastSevenDays({
   const todayIndex = Math.floor(visibleItems.length / 2);
   const today = visibleItems[todayIndex];
 
-  useEffect(() => {
-    const container = scrollContainerRef.current;
-    const todayCard = todayCardRef.current;
-
-    if (!container || !todayCard) {
-      return;
-    }
-
-    const targetScrollLeft =
-      todayCard.offsetLeft -
-      (container.clientWidth - todayCard.clientWidth) / 2;
-
-    container.scrollTo({
-      left: Math.max(0, targetScrollLeft),
-      behavior: "smooth",
-    });
-  }, []);
-
   if (visibleItems.length === 0 || !today) {
     return null;
   }
