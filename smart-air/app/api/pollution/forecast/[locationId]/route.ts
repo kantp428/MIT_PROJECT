@@ -11,7 +11,13 @@ const DATE_FORMATTER = new Intl.DateTimeFormat("en-US", {
   month: "short",
 });
 
-const formatIsoDate = (date: Date) => date.toISOString().slice(0, 10);
+const formatIsoDate = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+};
 
 const describeTrend = (
   current: number | null,
@@ -94,8 +100,8 @@ export async function GET(
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const actualStart = new Date(today);
     actualStart.setDate(today.getDate() - 7);
-    const actualEnd = new Date(today);
-    actualEnd.setDate(today.getDate() - 1);
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
     const predictedEnd = new Date(today);
     predictedEnd.setDate(today.getDate() + 6);
 
@@ -104,7 +110,7 @@ export async function GET(
         location_id: locationId,
         date: {
           gte: actualStart,
-          lte: actualEnd,
+          lte: yesterday,
         },
       },
       orderBy: {
@@ -116,6 +122,7 @@ export async function GET(
       where: {
         pm_actual: {
           location_id: locationId,
+          date: yesterday,
         },
         predicted_for: {
           gte: today,
