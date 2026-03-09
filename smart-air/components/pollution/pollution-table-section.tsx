@@ -10,7 +10,6 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
@@ -30,7 +29,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useDebounce } from "@/hooks/use-debounce";
+import { useLocationOptions } from "@/hooks/use-location-options";
 import {
   cn,
   getPM25Band,
@@ -39,6 +38,7 @@ import {
   type PM25Band,
 } from "@/lib/utils";
 import { AirStation } from "@/types/air-quality";
+import { LocationOption } from "@/types/location";
 import { Check, ChevronsUpDown, CloudBackup } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
@@ -228,6 +228,7 @@ export function PollutionTableSection({
     React.useState<string[]>([]);
   const [provinceDropdownOpen, setProvinceDropdownOpen] = React.useState(false);
   const [statusDropdownOpen, setStatusDropdownOpen] = React.useState(false);
+  const { data: provinceOptions } = useLocationOptions();
 
   const selectedProvinces =
     controlledSelectedProvinces ?? internalSelectedProvinces;
@@ -242,14 +243,16 @@ export function PollutionTableSection({
     setMounted(true);
   }, []);
 
-  const provinces = React.useMemo(() => {
-    return Array.from(new Set(airData.map((item) => item.province))).map(
-      (province) => ({
-        label: province,
-        value: province,
-      }),
-    );
-  }, [airData]);
+  const provinces = React.useMemo<LocationOption[]>(() => {
+    if (provinceOptions.length > 0) {
+      return provinceOptions;
+    }
+
+    return airData.map((item) => ({
+      label: item.province,
+      value: String(item.id),
+    }));
+  }, [airData, provinceOptions]);
 
   const statusOptions = React.useMemo<FilterOption[]>(
     () =>
@@ -280,7 +283,7 @@ export function PollutionTableSection({
   const filteredData = airData.filter((item) => {
     const matchesProvince =
       selectedProvinces.length === 0 ||
-      selectedProvinces.includes(item.province);
+      selectedProvinces.includes(String(item.id));
     const itemStatus = getPM25Band(item.pm25).labelTh;
     const matchesStatus =
       selectedStatuses.length === 0 || selectedStatuses.includes(itemStatus);
