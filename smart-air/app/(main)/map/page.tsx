@@ -1,5 +1,7 @@
 "use client";
 
+"use client";
+
 import MapLegend from "@/components/map/map-legend";
 import MapWrapper from "@/components/map/MapWrapper";
 import { PollutionTableSection } from "@/components/pollution/pollution-table-section";
@@ -37,7 +39,6 @@ export default function MainPage() {
       <MapLegend />
 
       <PollutionTableSection
-        airData={MOCK_AIR_STATIONS}
         selectedProvinces={selectedProvinces}
         onSelectedProvincesChange={setSelectedProvinces}
         selectedStatuses={selectedStatuses}

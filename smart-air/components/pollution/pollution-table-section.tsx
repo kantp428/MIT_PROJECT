@@ -30,6 +30,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useLocationOptions } from "@/hooks/use-location-options";
+import { usePollutionPredictions } from "@/hooks/use-pollution-predictions";
 import {
   cn,
   getPM25Band,
@@ -37,14 +38,12 @@ import {
   PM25_BANDS,
   type PM25Band,
 } from "@/lib/utils";
-import { AirStation } from "@/types/air-quality";
 import { LocationOption } from "@/types/location";
 import { Check, ChevronsUpDown, CloudBackup } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 
 interface PollutionTableSectionProps {
-  airData: AirStation[];
   title?: string;
   className?: string;
   selectedProvinces?: string[];
@@ -213,7 +212,6 @@ function MultiSelectFilter({
 }
 
 export function PollutionTableSection({
-  airData,
   title = "Air Quality Index Table",
   className,
   selectedProvinces: controlledSelectedProvinces,
@@ -228,6 +226,15 @@ export function PollutionTableSection({
     React.useState<string[]>([]);
   const [provinceDropdownOpen, setProvinceDropdownOpen] = React.useState(false);
   const [statusDropdownOpen, setStatusDropdownOpen] = React.useState(false);
+  const [page, setPage] = React.useState(1);
+  const limit = 20;
+
+  const {
+    data: predictions,
+    pagination,
+    isLoading: isLoadingPredictions,
+    error: predictionsError,
+  } = usePollutionPredictions(page, limit);
   const { data: provinceOptions } = useLocationOptions();
 
   const selectedProvinces =
@@ -242,6 +249,26 @@ export function PollutionTableSection({
   React.useEffect(() => {
     setMounted(true);
   }, []);
+
+  React.useEffect(() => {
+    if (pagination && page > pagination.totalPage) {
+      setPage(pagination.totalPage);
+    }
+  }, [pagination, page]);
+
+  const airData = React.useMemo(
+    () =>
+      predictions.map((prediction) => ({
+        id: prediction.id,
+        name: prediction.provinceName,
+        province: prediction.provinceName,
+        lat: 0,
+        lng: 0,
+        pm25: prediction.PM25 ?? 0,
+        lastUpdated: prediction.predicted_at,
+      })),
+    [predictions],
+  );
 
   const provinces = React.useMemo<LocationOption[]>(() => {
     if (provinceOptions.length > 0) {
@@ -290,6 +317,27 @@ export function PollutionTableSection({
 
     return matchesProvince && matchesStatus;
   });
+
+  const hasPreviousPage = page > 1;
+  const hasNextPage = Boolean(
+    pagination && pagination.page < pagination.totalPage,
+  );
+
+  const handlePreviousPage = () => {
+    if (!hasPreviousPage) {
+      return;
+    }
+
+    setPage((current) => Math.max(1, current - 1));
+  };
+
+  const handleNextPage = () => {
+    if (!hasNextPage) {
+      return;
+    }
+
+    setPage((current) => current + 1);
+  };
 
   return (
     <TooltipProvider>
@@ -340,7 +388,22 @@ export function PollutionTableSection({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredData.length > 0 ? (
+              {predictionsError ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={5}
+                    className="h-24 text-center text-sm text-destructive"
+                  >
+                    {predictionsError}
+                  </TableCell>
+                </TableRow>
+              ) : isLoadingPredictions ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="h-24 text-center">
+                    Loading pollution predictions...
+                  </TableCell>
+                </TableRow>
+              ) : filteredData.length > 0 ? (
                 filteredData.map((item) => (
                   <TableRow key={item.id}>
                     <TableCell className="font-mono text-xs">
@@ -392,10 +455,20 @@ export function PollutionTableSection({
         </div>
 
         <div className="flex items-center justify-end space-x-2 py-4">
-          <Button variant="outline" size="sm">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handlePreviousPage}
+            disabled={!hasPreviousPage}
+          >
             Previous
           </Button>
-          <Button variant="outline" size="sm">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleNextPage}
+            disabled={!hasNextPage}
+          >
             Next
           </Button>
         </div>

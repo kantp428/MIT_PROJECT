@@ -3,7 +3,7 @@ import { AirStation } from "@/types/air-quality";
 export const MOCK_AIR_STATIONS: AirStation[] = [
   {
     id: 1,
-    name: "เขตพญาไท",
+    name: "เขตพื้นที่",
     province: "กรุงเทพมหานคร",
     lat: 13.78,
     lng: 100.54,
@@ -20,4 +20,3 @@ export const MOCK_AIR_STATIONS: AirStation[] = [
     lastUpdated: "2026-02-16",
   },
 ];
-
