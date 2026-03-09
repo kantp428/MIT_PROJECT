@@ -112,7 +112,7 @@ export default function InformationPM() {
             </div>
             <div className="flex flex-wrap gap-3">
               <Button asChild size="lg" className="rounded-full px-6 shadow-sm">
-                <Link href="/map">
+                <Link href="/pollution">
                   ดูแผนที่คุณภาพอากาศ
                   <ArrowUpRight className="size-4" />
                 </Link>

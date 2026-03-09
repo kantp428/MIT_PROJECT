@@ -55,7 +55,7 @@ export default function HomePage() {
               size="lg"
               className="h-13 rounded-full px-10 text-sm tracking-[0.2em] uppercase md:text-base"
             >
-              <Link href="/map">
+              <Link href="/pollution">
                 ตรวจสอบเเผนที่
                 <ArrowRight />
               </Link>
