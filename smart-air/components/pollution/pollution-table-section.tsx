@@ -1,20 +1,4 @@
-"use client";
-
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import {
   Table,
   TableBody,
@@ -29,352 +13,41 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useLocationOptions } from "@/hooks/use-location-options";
-import { usePollutionPredictions } from "@/hooks/use-pollution-predictions";
-import {
-  cn,
-  getPM25Band,
-  getPM25Constant,
-  PM25_BANDS,
-  type PM25Band,
-} from "@/lib/utils";
-import { LocationOption } from "@/types/location";
-import { Check, ChevronsUpDown, CloudBackup } from "lucide-react";
+import { cn, getPM25Constant } from "@/lib/utils";
+import { AirStation } from "@/types/air-quality";
+import { CloudBackup } from "lucide-react";
 import Link from "next/link";
-import * as React from "react";
 
-interface PollutionTableSectionProps {
+interface PaginationControls {
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
+  onPreviousPage: () => void;
+  onNextPage: () => void;
+}
+
+interface PollutionTableSectionProps extends PaginationControls {
+  airData: AirStation[];
   title?: string;
   className?: string;
-  selectedProvinces?: string[];
-  onSelectedProvincesChange?: React.Dispatch<React.SetStateAction<string[]>>;
-  selectedStatuses?: string[];
-  onSelectedStatusesChange?: React.Dispatch<React.SetStateAction<string[]>>;
-}
-
-interface FilterOption {
-  label: string;
-  value: string;
-  color?: string;
-}
-
-interface MultiSelectFilterProps {
-  mounted: boolean;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  options: FilterOption[];
-  selectedValues: string[];
-  onToggle: (value: string) => void;
-  onClear: () => void;
-  placeholder: string;
-  searchPlaceholder: string;
-  emptyMessage: string;
-  clearButtonRightClassName?: string;
-  className?: string;
-}
-
-function MultiSelectFilter({
-  mounted,
-  open,
-  onOpenChange,
-  options,
-  selectedValues,
-  onToggle,
-  onClear,
-  placeholder,
-  searchPlaceholder,
-  emptyMessage,
-  clearButtonRightClassName = "right-8",
-  className,
-}: MultiSelectFilterProps) {
-  const selectedOptions = options.filter((option) =>
-    selectedValues.includes(option.value),
-  );
-  const visibleOptions = selectedOptions.slice(0, 2);
-  const hiddenCount = selectedOptions.length - visibleOptions.length;
-
-  const triggerContent = (
-    <>
-      <span className="flex min-w-0 flex-1 items-center overflow-hidden">
-        {selectedOptions.length > 0 ? (
-          <span className="flex min-w-0 flex-nowrap items-center gap-1 overflow-hidden">
-            {visibleOptions.map((option) => (
-              <Badge
-                key={option.value}
-                variant="secondary"
-                className="max-w-35 shrink-0 truncate border-transparent text-foreground"
-                style={
-                  option.color
-                    ? {
-                        backgroundColor: `${option.color}20`,
-                        borderColor: `${option.color}60`,
-                        color: option.color,
-                      }
-                    : undefined
-                }
-              >
-                {option.label}
-              </Badge>
-            ))}
-            {hiddenCount > 0 && (
-              <Badge variant="outline" className="shrink-0">
-                ...
-              </Badge>
-            )}
-          </span>
-        ) : (
-          <span className="truncate text-left text-muted-foreground">
-            {placeholder}
-          </span>
-        )}
-      </span>
-      <ChevronsUpDown className="size-4 shrink-0 opacity-50" />
-    </>
-  );
-
-  return (
-    <div className={cn("relative w-full max-w-md", className)}>
-      {mounted ? (
-        <Popover open={open} onOpenChange={onOpenChange}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              role="combobox"
-              aria-expanded={open}
-              className="h-auto min-h-9 w-full justify-between bg-background py-1.5 pr-24 font-sans"
-            >
-              {triggerContent}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-(--radix-popover-trigger-width) p-0">
-            <Command>
-              <CommandInput
-                placeholder={searchPlaceholder}
-                className="font-sans"
-              />
-              <CommandList>
-                <CommandEmpty>{emptyMessage}</CommandEmpty>
-                <CommandGroup>
-                  {options.map((option) => {
-                    const isSelected = selectedValues.includes(option.value);
-
-                    return (
-                      <CommandItem
-                        key={option.value}
-                        value={option.label}
-                        onSelect={() => onToggle(option.value)}
-                        className="font-sans"
-                      >
-                        <Check
-                          className={cn(
-                            "mr-2 size-4",
-                            isSelected ? "opacity-100" : "opacity-0",
-                          )}
-                        />
-                        {option.color && (
-                          <span
-                            className="mr-2 size-2.5 rounded-full"
-                            style={{ backgroundColor: option.color }}
-                          />
-                        )}
-                        {option.label}
-                      </CommandItem>
-                    );
-                  })}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
-      ) : (
-        <Button
-          variant="outline"
-          type="button"
-          className="h-auto min-h-9 w-full justify-between bg-background py-1.5 pr-24 font-sans"
-        >
-          {triggerContent}
-        </Button>
-      )}
-      {selectedOptions.length > 0 && (
-        <button
-          type="button"
-          onClick={onClear}
-          className={cn(
-            "absolute top-1/2 -translate-y-1/2 text-xs text-muted-foreground transition-colors hover:text-foreground",
-            clearButtonRightClassName,
-          )}
-        >
-          Clear all
-        </button>
-      )}
-    </div>
-  );
+  isLoading?: boolean;
+  error?: string | null;
 }
 
 export function PollutionTableSection({
+  airData,
   title = "Air Quality Index Table",
   className,
-  selectedProvinces: controlledSelectedProvinces,
-  onSelectedProvincesChange,
-  selectedStatuses: controlledSelectedStatuses,
-  onSelectedStatusesChange,
+  isLoading = false,
+  error = null,
+  hasPreviousPage,
+  hasNextPage,
+  onPreviousPage,
+  onNextPage,
 }: PollutionTableSectionProps) {
-  const [mounted, setMounted] = React.useState(false);
-  const [internalSelectedProvinces, setInternalSelectedProvinces] =
-    React.useState<string[]>([]);
-  const [internalSelectedStatuses, setInternalSelectedStatuses] =
-    React.useState<string[]>([]);
-  const [provinceDropdownOpen, setProvinceDropdownOpen] = React.useState(false);
-  const [statusDropdownOpen, setStatusDropdownOpen] = React.useState(false);
-  const [page, setPage] = React.useState(1);
-  const limit = 20;
-
-  const {
-    data: predictions,
-    pagination,
-    isLoading: isLoadingPredictions,
-    error: predictionsError,
-  } = usePollutionPredictions(page, limit);
-  const { data: provinceOptions } = useLocationOptions();
-
-  const selectedProvinces =
-    controlledSelectedProvinces ?? internalSelectedProvinces;
-  const setSelectedProvinces =
-    onSelectedProvincesChange ?? setInternalSelectedProvinces;
-  const selectedStatuses =
-    controlledSelectedStatuses ?? internalSelectedStatuses;
-  const setSelectedStatuses =
-    onSelectedStatusesChange ?? setInternalSelectedStatuses;
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  React.useEffect(() => {
-    if (pagination && page > pagination.totalPage) {
-      setPage(pagination.totalPage);
-    }
-  }, [pagination, page]);
-
-  const airData = React.useMemo(
-    () =>
-      predictions.map((prediction) => ({
-        id: prediction.id,
-        name: prediction.provinceName,
-        province: prediction.provinceName,
-        lat: 0,
-        lng: 0,
-        pm25: prediction.PM25 ?? 0,
-        lastUpdated: prediction.predicted_at,
-      })),
-    [predictions],
-  );
-
-  const provinces = React.useMemo<LocationOption[]>(() => {
-    if (provinceOptions.length > 0) {
-      return provinceOptions;
-    }
-
-    return airData.map((item) => ({
-      label: item.province,
-      value: String(item.id),
-    }));
-  }, [airData, provinceOptions]);
-
-  const statusOptions = React.useMemo<FilterOption[]>(
-    () =>
-      PM25_BANDS.map((band: PM25Band) => ({
-        label: band.labelTh,
-        value: band.labelTh,
-        color: band.color,
-      })),
-    [],
-  );
-
-  const toggleProvince = (province: string) => {
-    setSelectedProvinces((current) =>
-      current.includes(province)
-        ? current.filter((item) => item !== province)
-        : [...current, province],
-    );
-  };
-
-  const toggleStatus = (status: string) => {
-    setSelectedStatuses((current) =>
-      current.includes(status)
-        ? current.filter((item) => item !== status)
-        : [...current, status],
-    );
-  };
-
-  const filteredData = airData.filter((item) => {
-    const matchesProvince =
-      selectedProvinces.length === 0 ||
-      selectedProvinces.includes(String(item.id));
-    const itemStatus = getPM25Band(item.pm25).labelTh;
-    const matchesStatus =
-      selectedStatuses.length === 0 || selectedStatuses.includes(itemStatus);
-
-    return matchesProvince && matchesStatus;
-  });
-
-  const hasPreviousPage = page > 1;
-  const hasNextPage = Boolean(
-    pagination && pagination.page < pagination.totalPage,
-  );
-
-  const handlePreviousPage = () => {
-    if (!hasPreviousPage) {
-      return;
-    }
-
-    setPage((current) => Math.max(1, current - 1));
-  };
-
-  const handleNextPage = () => {
-    if (!hasNextPage) {
-      return;
-    }
-
-    setPage((current) => current + 1);
-  };
-
   return (
     <TooltipProvider>
       <div className={cn("space-y-4 p-6", className)}>
         <h1 className="font-sans text-2xl font-bold tracking-tight">{title}</h1>
-
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-4 xl:flex-row xl:items-start">
-            <MultiSelectFilter
-              mounted={mounted}
-              open={provinceDropdownOpen}
-              onOpenChange={setProvinceDropdownOpen}
-              options={provinces}
-              selectedValues={selectedProvinces}
-              onToggle={toggleProvince}
-              onClear={() => setSelectedProvinces([])}
-              placeholder="ค้นหาและเลือกจังหวัด"
-              searchPlaceholder="ค้นหาจังหวัด..."
-              emptyMessage="ไม่พบจังหวัดที่ค้นหา"
-            />
-
-            <MultiSelectFilter
-              mounted={mounted}
-              open={statusDropdownOpen}
-              onOpenChange={setStatusDropdownOpen}
-              options={statusOptions}
-              selectedValues={selectedStatuses}
-              onToggle={toggleStatus}
-              onClear={() => setSelectedStatuses([])}
-              placeholder="เลือกสถานะฝุ่น"
-              searchPlaceholder="ค้นหาสถานะฝุ่น..."
-              emptyMessage="ไม่พบสถานะฝุ่นที่ค้นหา"
-              clearButtonRightClassName="right-9"
-              className="max-w-xs"
-            />
-          </div>
-        </div>
 
         <div className="rounded-md border border-border bg-card">
           <Table>
@@ -388,23 +61,23 @@ export function PollutionTableSection({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {predictionsError ? (
+              {error ? (
                 <TableRow>
                   <TableCell
                     colSpan={5}
                     className="h-24 text-center text-sm text-destructive"
                   >
-                    {predictionsError}
+                    {error}
                   </TableCell>
                 </TableRow>
-              ) : isLoadingPredictions ? (
+              ) : isLoading ? (
                 <TableRow>
                   <TableCell colSpan={5} className="h-24 text-center">
                     Loading pollution predictions...
                   </TableCell>
                 </TableRow>
-              ) : filteredData.length > 0 ? (
-                filteredData.map((item) => (
+              ) : airData.length > 0 ? (
+                airData.map((item) => (
                   <TableRow key={item.id}>
                     <TableCell className="font-mono text-xs">
                       {item.id}
@@ -458,7 +131,7 @@ export function PollutionTableSection({
           <Button
             variant="outline"
             size="sm"
-            onClick={handlePreviousPage}
+            onClick={onPreviousPage}
             disabled={!hasPreviousPage}
           >
             Previous
@@ -466,7 +139,7 @@ export function PollutionTableSection({
           <Button
             variant="outline"
             size="sm"
-            onClick={handleNextPage}
+            onClick={onNextPage}
             disabled={!hasNextPage}
           >
             Next

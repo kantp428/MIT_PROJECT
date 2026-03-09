@@ -50,6 +50,8 @@ export async function GET(request: Request) {
           select: {
             id: true,
             province: true,
+            latitude: true,
+            longitude: true,
           },
         },
         pm_prediction: {
@@ -97,6 +99,14 @@ export async function GET(request: Request) {
               ? Math.round(Number(prediction.pm_predicted) * 100) / 100
               : null,
           predicted_at: formatPredictedAt(prediction.predicted_at),
+          latitude:
+            actual.location.latitude !== null
+              ? Number(actual.location.latitude)
+              : null,
+          longitude:
+            actual.location.longitude !== null
+              ? Number(actual.location.longitude)
+              : null,
         };
       })
       .filter(

@@ -3,6 +3,8 @@ export interface PollutionPredictionRow {
   provinceName: string;
   PM25: number | null;
   predicted_at: string;
+  latitude: number | null;
+  longitude: number | null;
 }
 
 export interface PollutionPagination {
