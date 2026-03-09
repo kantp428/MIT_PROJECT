@@ -1,39 +1,45 @@
-"use client";
-
-import { Moon, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
+"use-client";
 
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
-export function ModeToggle() {
-  const { setTheme } = useTheme();
+function ModeToggle() {
+  const { setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  // Prevent Hydration
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return <Button variant={"outline"} size={"icon"} disabled />;
+  }
+
+  const toggleTheme = () => {
+    setTheme(resolvedTheme === "dark" ? "light" : "dark");
+  };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon">
-          <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+    <Tooltip delayDuration={300}>
+      <TooltipTrigger asChild>
+        <Button variant="outline" size="icon" onClick={toggleTheme}>
+          {resolvedTheme === "dark" ? (
+            <Sun className="h-[1.2rem] w-[1.2rem] transition-all" />
+          ) : (
+            <Moon className="h-[1.2rem] w-[1.2rem] transition-all" />
+          )}
           <span className="sr-only">Toggle theme</span>
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("light")}>
-          Light
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
-          Dark
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
-          System
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </TooltipTrigger>
+      <TooltipContent side="bottom">
+        <p>Switch to {resolvedTheme === "dark" ? "light" : "dark"} mode</p>
+      </TooltipContent>
+    </Tooltip>
   );
 }
+
+export default ModeToggle;

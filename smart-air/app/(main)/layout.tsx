@@ -1,34 +1,27 @@
-import { AppSidebar } from "@/components/layout/app-sidebar";
-import { ModeToggle } from "@/components/mode-toggle";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+"use client";
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+import { AppSidebar } from "@/components/layout/app-sidebar";
+import AppFooter from "@/components/layout/app-footer";
+import AppHeader from "@/components/layout/app-header";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+
+const AppLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full">
-        {/* 1. Sider (Left) */}
+      <div className="flex h-screen w-full overflow-hidden bg-background">
         <AppSidebar />
-
-        <div className="flex flex-col flex-1">
-          {/* 2. Header (Top) */}
-          <header className="flex h-16 items-center border-b px-6 justify-between bg-background">
-            <SidebarTrigger />
-            <div className="font-semibold">My Dashboard</div>
-            {/* Avatar Placeholder */}
-            <div className="w-8 h-8">
-              <ModeToggle />
-            </div>{" "}
-          </header>
-
-          {/* 3. Main Content */}
-          <main className="flex-1 p-6">{children}</main>
-
-          {/* 4. Footer (Bottom) */}
-          <footer className="border-t p-4 text-center text-sm text-muted-foreground">
-            © 2026 Smart Air (MIT Project). Built with NextJS & Shadcn.
-          </footer>
-        </div>
+        <SidebarInset className="flex flex-col h-screen min-w-0 overflow-hidden">
+          <div className="sticky top-0 z-30 w-full flex-none">
+            <AppHeader />
+          </div>
+          <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6 bg-background/50">
+            <div className="mx-auto w-full">{children}</div>
+            <AppFooter />
+          </main>
+        </SidebarInset>
       </div>
     </SidebarProvider>
   );
-}
+};
+
+export default AppLayout;
