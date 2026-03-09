@@ -27,32 +27,216 @@ import {
 import {
   Tooltip,
   TooltipContent,
+  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useDebounce } from "@/hooks/use-debounce";
-import { cn, getPM25Constant } from "@/lib/utils";
+import {
+  cn,
+  getPM25Band,
+  getPM25Constant,
+  PM25_BANDS,
+  type PM25Band,
+} from "@/lib/utils";
 import { AirStation } from "@/types/air-quality";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, CloudBackup } from "lucide-react";
+import Link from "next/link";
 import * as React from "react";
 
 interface PollutionTableSectionProps {
   airData: AirStation[];
   title?: string;
   className?: string;
+  selectedProvinces?: string[];
+  onSelectedProvincesChange?: React.Dispatch<React.SetStateAction<string[]>>;
+  selectedStatuses?: string[];
+  onSelectedStatusesChange?: React.Dispatch<React.SetStateAction<string[]>>;
+}
+
+interface FilterOption {
+  label: string;
+  value: string;
+  color?: string;
+}
+
+interface MultiSelectFilterProps {
+  mounted: boolean;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  options: FilterOption[];
+  selectedValues: string[];
+  onToggle: (value: string) => void;
+  onClear: () => void;
+  placeholder: string;
+  searchPlaceholder: string;
+  emptyMessage: string;
+  clearButtonRightClassName?: string;
+  className?: string;
+}
+
+function MultiSelectFilter({
+  mounted,
+  open,
+  onOpenChange,
+  options,
+  selectedValues,
+  onToggle,
+  onClear,
+  placeholder,
+  searchPlaceholder,
+  emptyMessage,
+  clearButtonRightClassName = "right-8",
+  className,
+}: MultiSelectFilterProps) {
+  const selectedOptions = options.filter((option) =>
+    selectedValues.includes(option.value),
+  );
+  const visibleOptions = selectedOptions.slice(0, 2);
+  const hiddenCount = selectedOptions.length - visibleOptions.length;
+
+  const triggerContent = (
+    <>
+      <span className="flex min-w-0 flex-1 items-center overflow-hidden">
+        {selectedOptions.length > 0 ? (
+          <span className="flex min-w-0 flex-nowrap items-center gap-1 overflow-hidden">
+            {visibleOptions.map((option) => (
+              <Badge
+                key={option.value}
+                variant="secondary"
+                className="max-w-35 shrink-0 truncate border-transparent text-foreground"
+                style={
+                  option.color
+                    ? {
+                        backgroundColor: `${option.color}20`,
+                        borderColor: `${option.color}60`,
+                        color: option.color,
+                      }
+                    : undefined
+                }
+              >
+                {option.label}
+              </Badge>
+            ))}
+            {hiddenCount > 0 && (
+              <Badge variant="outline" className="shrink-0">
+                ...
+              </Badge>
+            )}
+          </span>
+        ) : (
+          <span className="truncate text-left text-muted-foreground">
+            {placeholder}
+          </span>
+        )}
+      </span>
+      <ChevronsUpDown className="size-4 shrink-0 opacity-50" />
+    </>
+  );
+
+  return (
+    <div className={cn("relative w-full max-w-md", className)}>
+      {mounted ? (
+        <Popover open={open} onOpenChange={onOpenChange}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={open}
+              className="h-auto min-h-9 w-full justify-between bg-background py-1.5 pr-24 font-sans"
+            >
+              {triggerContent}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-(--radix-popover-trigger-width) p-0">
+            <Command>
+              <CommandInput
+                placeholder={searchPlaceholder}
+                className="font-sans"
+              />
+              <CommandList>
+                <CommandEmpty>{emptyMessage}</CommandEmpty>
+                <CommandGroup>
+                  {options.map((option) => {
+                    const isSelected = selectedValues.includes(option.value);
+
+                    return (
+                      <CommandItem
+                        key={option.value}
+                        value={option.label}
+                        onSelect={() => onToggle(option.value)}
+                        className="font-sans"
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 size-4",
+                            isSelected ? "opacity-100" : "opacity-0",
+                          )}
+                        />
+                        {option.color && (
+                          <span
+                            className="mr-2 size-2.5 rounded-full"
+                            style={{ backgroundColor: option.color }}
+                          />
+                        )}
+                        {option.label}
+                      </CommandItem>
+                    );
+                  })}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+      ) : (
+        <Button
+          variant="outline"
+          type="button"
+          className="h-auto min-h-9 w-full justify-between bg-background py-1.5 pr-24 font-sans"
+        >
+          {triggerContent}
+        </Button>
+      )}
+      {selectedOptions.length > 0 && (
+        <button
+          type="button"
+          onClick={onClear}
+          className={cn(
+            "absolute top-1/2 -translate-y-1/2 text-xs text-muted-foreground transition-colors hover:text-foreground",
+            clearButtonRightClassName,
+          )}
+        >
+          Clear all
+        </button>
+      )}
+    </div>
+  );
 }
 
 export function PollutionTableSection({
   airData,
   title = "Air Quality Index Table",
   className,
+  selectedProvinces: controlledSelectedProvinces,
+  onSelectedProvincesChange,
+  selectedStatuses: controlledSelectedStatuses,
+  onSelectedStatusesChange,
 }: PollutionTableSectionProps) {
   const [mounted, setMounted] = React.useState(false);
-  const [search, setSearch] = React.useState("");
-  const [selectedProvinces, setSelectedProvinces] = React.useState<string[]>(
-    [],
-  );
+  const [internalSelectedProvinces, setInternalSelectedProvinces] =
+    React.useState<string[]>([]);
+  const [internalSelectedStatuses, setInternalSelectedStatuses] =
+    React.useState<string[]>([]);
   const [provinceDropdownOpen, setProvinceDropdownOpen] = React.useState(false);
-  const debouncedSearch = useDebounce(search, 500);
+  const [statusDropdownOpen, setStatusDropdownOpen] = React.useState(false);
+
+  const selectedProvinces =
+    controlledSelectedProvinces ?? internalSelectedProvinces;
+  const setSelectedProvinces =
+    onSelectedProvincesChange ?? setInternalSelectedProvinces;
+  const selectedStatuses =
+    controlledSelectedStatuses ?? internalSelectedStatuses;
+  const setSelectedStatuses =
+    onSelectedStatusesChange ?? setInternalSelectedStatuses;
 
   React.useEffect(() => {
     setMounted(true);
@@ -67,12 +251,15 @@ export function PollutionTableSection({
     );
   }, [airData]);
 
-  const selectedProvinceLabels = provinces.filter((province) =>
-    selectedProvinces.includes(province.value),
+  const statusOptions = React.useMemo<FilterOption[]>(
+    () =>
+      PM25_BANDS.map((band: PM25Band) => ({
+        label: band.labelTh,
+        value: band.labelTh,
+        color: band.color,
+      })),
+    [],
   );
-  const visibleProvinceLabels = selectedProvinceLabels.slice(0, 2);
-  const hiddenProvinceCount =
-    selectedProvinceLabels.length - visibleProvinceLabels.length;
 
   const toggleProvince = (province: string) => {
     setSelectedProvinces((current) =>
@@ -82,199 +269,134 @@ export function PollutionTableSection({
     );
   };
 
-  const clearAllProvinces = () => {
-    setSelectedProvinces([]);
+  const toggleStatus = (status: string) => {
+    setSelectedStatuses((current) =>
+      current.includes(status)
+        ? current.filter((item) => item !== status)
+        : [...current, status],
+    );
   };
 
   const filteredData = airData.filter((item) => {
-    const matchesSearch = item.name
-      .toLowerCase()
-      .includes(debouncedSearch.toLowerCase());
     const matchesProvince =
       selectedProvinces.length === 0 ||
       selectedProvinces.includes(item.province);
+    const itemStatus = getPM25Band(item.pm25).labelTh;
+    const matchesStatus =
+      selectedStatuses.length === 0 || selectedStatuses.includes(itemStatus);
 
-    return matchesSearch && matchesProvince;
+    return matchesProvince && matchesStatus;
   });
 
-  const triggerContent = (
-    <>
-      <span className="flex min-w-0 flex-1 items-center overflow-hidden">
-        {selectedProvinceLabels.length > 0 ? (
-          <span className="flex min-w-0 flex-nowrap items-center gap-1 overflow-hidden">
-            {visibleProvinceLabels.map((province) => (
-              <Badge
-                key={province.value}
-                variant="secondary"
-                className="max-w-35 shrink-0 truncate"
-              >
-                {province.label}
-              </Badge>
-            ))}
-            {hiddenProvinceCount > 0 && (
-              <Badge variant="outline" className="shrink-0">
-                ...
-              </Badge>
-            )}
-          </span>
-        ) : (
-          <span className="truncate text-left text-muted-foreground">
-            ค้นหาและเลือกจังหวัด
-          </span>
-        )}
-      </span>
-      <ChevronsUpDown className="size-4 shrink-0 opacity-50" />
-    </>
-  );
-
   return (
-    <div className={cn("space-y-4 p-6", className)}>
-      <h1 className="font-sans text-2xl font-bold tracking-tight">{title}</h1>
+    <TooltipProvider>
+      <div className={cn("space-y-4 p-6", className)}>
+        <h1 className="font-sans text-2xl font-bold tracking-tight">{title}</h1>
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-        <div className="flex-1">
-          <Input
-            placeholder="ค้นหาชื่อตำบล/เขต..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="max-w-sm"
-          />
-        </div>
-
-        <div className="relative w-full max-w-md">
-          {mounted ? (
-            <Popover
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-start">
+            <MultiSelectFilter
+              mounted={mounted}
               open={provinceDropdownOpen}
               onOpenChange={setProvinceDropdownOpen}
-            >
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={provinceDropdownOpen}
-                  className="h-auto min-h-9 w-full justify-between bg-background py-1.5 pr-24 font-sans"
-                >
-                  {triggerContent}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
-                <Command>
-                  <CommandInput
-                    placeholder="ค้นหาจังหวัด..."
-                    className="font-sans"
-                  />
-                  <CommandList>
-                    <CommandEmpty>ไม่พบจังหวัดที่ค้นหา</CommandEmpty>
-                    <CommandGroup>
-                      {provinces.map((province) => {
-                        const isSelected = selectedProvinces.includes(
-                          province.value,
-                        );
+              options={provinces}
+              selectedValues={selectedProvinces}
+              onToggle={toggleProvince}
+              onClear={() => setSelectedProvinces([])}
+              placeholder="ค้นหาและเลือกจังหวัด"
+              searchPlaceholder="ค้นหาจังหวัด..."
+              emptyMessage="ไม่พบจังหวัดที่ค้นหา"
+            />
 
-                        return (
-                          <CommandItem
-                            key={province.value}
-                            value={province.label}
-                            onSelect={() => toggleProvince(province.value)}
-                            className="font-sans"
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 size-4",
-                                isSelected ? "opacity-100" : "opacity-0",
-                              )}
-                            />
-                            {province.label}
-                          </CommandItem>
-                        );
-                      })}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
-          ) : (
-            <Button
-              variant="outline"
-              type="button"
-              className="h-auto min-h-9 w-full justify-between bg-background py-1.5 pr-24 font-sans"
-            >
-              {triggerContent}
-            </Button>
-          )}
-          {selectedProvinceLabels.length > 0 && (
-            <button
-              type="button"
-              onClick={clearAllProvinces}
-              className="absolute right-8 top-1/2 -translate-y-1/2 text-xs text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Clear all
-            </button>
-          )}
+            <MultiSelectFilter
+              mounted={mounted}
+              open={statusDropdownOpen}
+              onOpenChange={setStatusDropdownOpen}
+              options={statusOptions}
+              selectedValues={selectedStatuses}
+              onToggle={toggleStatus}
+              onClear={() => setSelectedStatuses([])}
+              placeholder="เลือกสถานะฝุ่น"
+              searchPlaceholder="ค้นหาสถานะฝุ่น..."
+              emptyMessage="ไม่พบสถานะฝุ่นที่ค้นหา"
+              clearButtonRightClassName="right-9"
+              className="max-w-xs"
+            />
+          </div>
         </div>
-      </div>
 
-      <div className="rounded-md border border-border bg-card">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-muted/50">
-              <TableHead className="w-25">ID</TableHead>
-              <TableHead>พื้นที่</TableHead>
-              <TableHead>จังหวัด</TableHead>
-              <TableHead className="text-center">PM2.5 (µg/m³)</TableHead>
-              <TableHead>อัปเดตล่าสุด</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredData.length > 0 ? (
-              filteredData.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell className="font-mono text-xs">{item.id}</TableCell>
-                  <TableCell className="font-medium">{item.name}</TableCell>
-                  <TableCell className="font-medium">{item.province}</TableCell>
-                  <TableCell className="text-center">
-                    <div className="inline-flex items-center gap-2">
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <div
-                            className="size-3 rounded-full shadow-inner"
-                            style={{
-                              backgroundColor: getPM25Constant(item.pm25).color,
-                            }}
-                          />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>{getPM25Constant(item.pm25).labelTh}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                      <span className="font-bold">{item.pm25}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {item.lastUpdated}
+        <div className="rounded-md border border-border bg-card">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/50">
+                <TableHead className="w-25">ID</TableHead>
+                <TableHead>จังหวัด</TableHead>
+                <TableHead className="text-center">PM2.5 (µg/m³)</TableHead>
+                <TableHead className="text-center">อัปเดตล่าสุด</TableHead>
+                <TableHead className="text-center">ข้อมูลย้อนหลัง</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredData.length > 0 ? (
+                filteredData.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell className="font-mono text-xs">
+                      {item.id}
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {item.province}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <div className="inline-flex items-center gap-2">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div
+                              className="size-3 rounded-full shadow-inner"
+                              style={{
+                                backgroundColor: getPM25Constant(item.pm25)
+                                  .color,
+                              }}
+                            />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{getPM25Constant(item.pm25).labelTh}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                        <span className="font-bold">{item.pm25}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center text-sm text-muted-foreground">
+                      {item.lastUpdated}
+                    </TableCell>
+                    <TableCell className="text-center text-sm text-muted-foreground">
+                      <Button variant="ghost" size="icon" asChild>
+                        <Link href={`/map/7-past/${item.id}`}>
+                          <CloudBackup />
+                        </Link>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={5} className="h-24 text-center">
+                    ไม่พบข้อมูลที่ค้นหา
                   </TableCell>
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={5} className="h-24 text-center">
-                  ไม่พบข้อมูลที่ค้นหา
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+              )}
+            </TableBody>
+          </Table>
+        </div>
 
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <Button variant="outline" size="sm">
-          Previous
-        </Button>
-        <Button variant="outline" size="sm">
-          Next
-        </Button>
+        <div className="flex items-center justify-end space-x-2 py-4">
+          <Button variant="outline" size="sm">
+            Previous
+          </Button>
+          <Button variant="outline" size="sm">
+            Next
+          </Button>
+        </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 }
-
