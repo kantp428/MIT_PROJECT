@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/tooltip";
 import { cn, getPM25Constant } from "@/lib/utils";
 import { AirStation } from "@/types/air-quality";
-import { CloudBackup } from "lucide-react";
+import { Calendar, CalendarClock, CloudBackup } from "lucide-react";
 import Link from "next/link";
 
 interface PaginationControls {
@@ -57,7 +57,7 @@ export function PollutionTableSection({
                 <TableHead>จังหวัด</TableHead>
                 <TableHead className="text-center">PM2.5 (µg/m³)</TableHead>
                 <TableHead className="text-center">อัปเดตล่าสุด</TableHead>
-                <TableHead className="text-center">ข้อมูลย้อนหลัง</TableHead>
+                <TableHead className="text-center">รายละเอียด</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -110,7 +110,7 @@ export function PollutionTableSection({
                     <TableCell className="text-center text-sm text-muted-foreground">
                       <Button variant="ghost" size="icon" asChild>
                         <Link href={`/map/7-past/${item.id}`}>
-                          <CloudBackup />
+                          <CalendarClock />
                         </Link>
                       </Button>
                     </TableCell>
