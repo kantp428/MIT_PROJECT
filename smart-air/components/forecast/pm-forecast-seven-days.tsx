@@ -3,10 +3,7 @@ import { Button } from "@/components/ui/button";
 import { getPM25Constant } from "@/lib/utils";
 import { Activity, CalendarRange, Wind } from "lucide-react";
 
-export interface ProvinceOption {
-  id: string;
-  name: string;
-}
+
 
 export interface PM25ForecastDayItem {
   day: string;
@@ -17,61 +14,37 @@ export interface PM25ForecastDayItem {
 }
 
 export interface PM25ForecastItem {
-  provinceId: string;
+  provinceId: number;
   provinceName: string;
   data: PM25ForecastDayItem[];
 }
 
 interface WeatherForecastSevenDaysProps {
-  provinceId?: string;
-  provinces?: ProvinceOption[];
+  provinceId?: number;
   forecastItems?: PM25ForecastItem[];
   title?: string;
   actionLabel?: string;
 }
 
-const DEFAULT_PROVINCES: ProvinceOption[] = [
-  { id: "TH-10", name: "กรุงเทพมหานคร" },
-  { id: "TH-50", name: "เชียงใหม่" },
-  { id: "TH-40", name: "ขอนแก่น" },
-  { id: "TH-83", name: "ภูเก็ต" },
-];
-
-const DEFAULT_FORECAST_ITEMS: PM25ForecastItem[] = [
-  {
-    provinceId: "TH-10",
-    provinceName: "กรุงเทพมหานคร",
-    data: [
-      { day: "Mon", date: "09 Mar", value: 42, trend: "เพิ่มขึ้นเล็กน้อย", source: "จราจร + อากาศนิ่ง" },
-      { day: "Tue", date: "10 Mar", value: 38, trend: "ทรงตัว", source: "ฝุ่นสะสมในเมือง" },
-      { day: "Wed", date: "11 Mar", value: 29, trend: "ลดลง", source: "การระบายอากาศดีขึ้น" },
-      { day: "Thu", date: "12 Mar", value: 55, trend: "เพิ่มขึ้น", source: "ฝุ่นสะสมช่วงเช้า" },
-      { day: "Fri", date: "13 Mar", value: 61, trend: "สูงต่อเนื่อง", source: "อากาศนิ่ง + การเผาไหม้" },
-      { day: "Sat", date: "14 Mar", value: 34, trend: "เริ่มดีขึ้น", source: "ลมช่วยพัดกระจาย" },
-      { day: "Sun", date: "15 Mar", value: 22, trend: "อยู่ในเกณฑ์ดี", source: "สภาพอากาศเปิด" },
-    ],
-  },
-];
 
 export function WeatherForecastSevenDays({
-  provinceId = "TH-10",
-  provinces = DEFAULT_PROVINCES,
-  forecastItems = DEFAULT_FORECAST_ITEMS,
+  provinceId,
+  forecastItems,
   title = "7 Days PM2.5 Forecast",
   actionLabel = "Mock PM2.5",
 }: WeatherForecastSevenDaysProps) {
-  const province =
-    provinces.find((item) => item.id === provinceId) ?? provinces[0];
-
+ 
   const selectedForecast =
-    forecastItems.find((item) => item.provinceId === provinceId) ??
-    forecastItems.find((item) => item.provinceName === province?.name) ??
-    forecastItems[0];
+    forecastItems!.find((item) => item.provinceId === provinceId) ??
+    forecastItems!.find((item) => item.provinceName ) ??
+    forecastItems![0];
 
   const visibleItems = selectedForecast?.data.slice(0, 7) ?? [];
   const today = visibleItems[0];
 
-  if (!province || !selectedForecast || visibleItems.length === 0 || !today) {
+  console.log(provinceId,selectedForecast,visibleItems.length,today)
+
+  if (!provinceId || !selectedForecast || visibleItems.length === 0 || !today) {
     return null;
   }
 

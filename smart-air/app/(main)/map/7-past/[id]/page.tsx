@@ -33,11 +33,12 @@ const PM25_FORECAST_ITEMS: PM25ForecastItem[] = [
   },
 ];
 
-export default function HomePage() {
+export default async function PMForecast({params} : {params: {id : string}}) {
+  const {id} = await params ;
   return (
     <main className="mx-auto max-w-7xl p-6">
       <WeatherForecastSevenDays
-        provinceId={1}
+        provinceId={Number(id)}
         forecastItems={PM25_FORECAST_ITEMS}
       />
     </main>
