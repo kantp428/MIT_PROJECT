@@ -1,0 +1,14 @@
+services:
+  smart-air:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: smart-air:latest
+    ports:
+      - "4000:4000"
+    env_file:
+      - .env.local
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+    restart: unless-stopped
