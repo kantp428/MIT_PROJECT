@@ -16,7 +16,7 @@ from datetime import date, datetime, timedelta
 # CONFIG
 # ===============================
 
-OPENAQ_API_KEY = "13e6eed65fc8ccd6f9fe75617c6cbbf4ccad71a363d6592153a63a1d8a76860b"
+OPENAQ_API_KEY = ""
 API_BASE_URL   = "https://mit-project-kdse.vercel.app/"   # TODO: เปลี่ยนเป็น URL จริง
 
 LOCATIONS = [
