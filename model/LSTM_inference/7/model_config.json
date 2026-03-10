@@ -1,0 +1,41 @@
+{
+  "window_size": 7,
+  "forecast_days": 7,
+  "feature_cols": [
+    "dew_point_2m_mean",
+    "temperature_2m_mean",
+    "precipitation_sum",
+    "wind_speed_10m_mean",
+    "surface_pressure_mean",
+    "relative_humidity_2m_mean",
+    "pm25",
+    "wind_dir_sin",
+    "wind_dir_cos",
+    "month_sin",
+    "month_cos"
+  ],
+  "target_col": "pm25",
+  "pm25_idx": 6,
+  "pm25_robust_idx": 0,
+  "input_size": 11,
+  "hidden_size": 64,
+  "num_layers": 2,
+  "dropout": 0.3,
+  "robust_cols": [
+    "pm25",
+    "precipitation_sum"
+  ],
+  "standard_cols": [
+    "dew_point_2m_mean",
+    "temperature_2m_mean",
+    "wind_speed_10m_mean",
+    "surface_pressure_mean",
+    "relative_humidity_2m_mean"
+  ],
+  "passthrough_cols": [
+    "wind_dir_sin",
+    "wind_dir_cos",
+    "month_sin",
+    "month_cos"
+  ]
+}

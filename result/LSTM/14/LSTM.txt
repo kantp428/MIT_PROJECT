@@ -1,0 +1,20 @@
+Hyperparameters:
+  hidden_size:  64
+  num_layers:   2
+  dropout:      0.3
+  lr:           0.001 (ReduceLROnPlateau)
+  batch_size:   32
+  weight_decay: 0.0001
+  grad_clip:    1.0
+  epochs:       300 (early stopping patience=30)
+
+
+=== Metrics per Horizon (Test set) ===
+
+Day+1:  R²=0.8243 MSE=73.2381  RMSE=8.5579  MAE=4.7960  MBE=0.4231
+Day+2:  R²=0.7345 MSE=110.6067  RMSE=10.5170  MAE=5.7641  MBE=0.9766
+Day+3:  R²=0.6715 MSE=136.7049  RMSE=11.6921  MAE=6.3861  MBE=1.0951
+Day+4:  R²=0.6193 MSE=158.3352  RMSE=12.5831  MAE=6.9093  MBE=1.2667
+Day+5:  R²=0.5811 MSE=173.8658  RMSE=13.1858  MAE=7.2262  MBE=1.3839
+Day+6:  R²=0.5429 MSE=189.3802  RMSE=13.7615  MAE=7.4355  MBE=1.3626
+Day+7:  R²=0.4875 MSE=211.7910  RMSE=14.5530  MAE=7.8276  MBE=1.8889

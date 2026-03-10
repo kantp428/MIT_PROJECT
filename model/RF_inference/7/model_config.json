@@ -1,0 +1,44 @@
+{
+  "lag_days": 7,
+  "forecast_days": 7,
+  "feature_cols": [
+    "dew_point_2m_mean",
+    "temperature_2m_mean",
+    "precipitation_sum",
+    "wind_speed_10m_mean",
+    "surface_pressure_mean",
+    "relative_humidity_2m_mean",
+    "wind_dir_sin",
+    "wind_dir_cos",
+    "month_sin",
+    "month_cos",
+    "pm25",
+    "pm25_lag1",
+    "pm25_lag2",
+    "pm25_lag3",
+    "pm25_lag4",
+    "pm25_lag5",
+    "pm25_lag6"
+  ],
+  "weather_cols": [
+    "dew_point_2m_mean",
+    "temperature_2m_mean",
+    "precipitation_sum",
+    "wind_speed_10m_mean",
+    "surface_pressure_mean",
+    "relative_humidity_2m_mean",
+    "wind_dir_sin",
+    "wind_dir_cos",
+    "month_sin",
+    "month_cos"
+  ],
+  "pm25_lag_cols": [
+    "pm25",
+    "pm25_lag1",
+    "pm25_lag2",
+    "pm25_lag3",
+    "pm25_lag4",
+    "pm25_lag5",
+    "pm25_lag6"
+  ]
+}

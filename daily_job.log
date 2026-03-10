@@ -1,0 +1,52 @@
+2026-03-10 07:46:45,862 [INFO] === Daily Job เริ่มทำงาน | target_date=2026-03-09 ===
+2026-03-10 07:46:45,862 [INFO] --- [57T] เชียงราย ---
+2026-03-10 07:46:48,385 [INFO] [57T] pm=40.8174, temp=24.8
+2026-03-10 07:46:50,667 [ERROR] [57T] POST actual FAILED 500: {"message":"Unable to create actual pollution record"}
+2026-03-10 07:46:53,488 [INFO] [57T] forecast: [40.99, 40.53, 39.41, 37.77, 37.13, 36.59, 37.03]
+2026-03-10 07:46:56,335 [INFO] [57T] POST predicted OK — 7 วัน
+2026-03-10 07:46:56,335 [INFO] --- [58T] แม่ฮ่องสอน ---
+2026-03-10 07:46:58,829 [INFO] [58T] pm=14.7826, temp=26.1
+2026-03-10 07:46:59,556 [ERROR] [58T] POST actual FAILED 500: {"message":"Unable to create actual pollution record"}
+2026-03-10 07:47:02,367 [INFO] [58T] forecast: [16.7, 17.76, 18.18, 19.11, 20.11, 21.26, 21.19]
+2026-03-10 07:47:04,850 [INFO] [58T] POST predicted OK — 7 วัน
+2026-03-10 07:47:04,850 [INFO] --- [82T] หนองคาย ---
+2026-03-10 07:47:17,917 [INFO] [82T] pm=29.9457, temp=26.5
+2026-03-10 07:47:20,018 [ERROR] [82T] POST actual FAILED 500: {"message":"Unable to create actual pollution record"}
+2026-03-10 07:47:22,700 [INFO] [82T] forecast: [33.62, 32.95, 32.77, 32.49, 32.74, 32.82, 33.31]
+2026-03-10 07:47:25,101 [INFO] [82T] POST predicted OK — 7 วัน
+2026-03-10 07:47:25,101 [INFO] --- [83T] อุบลราชธานี ---
+2026-03-10 07:47:28,067 [INFO] [83T] pm=25.3826, temp=26.6
+2026-03-10 07:47:28,798 [ERROR] [83T] POST actual FAILED 500: {"message":"Unable to create actual pollution record"}
+2026-03-10 07:47:31,633 [INFO] [83T] forecast: [27.87, 30.12, 30.57, 29.96, 29.95, 29.9, 29.69]
+2026-03-10 07:47:34,167 [INFO] [83T] POST predicted OK — 7 วัน
+2026-03-10 07:47:34,167 [INFO] --- [86T] พิษณุโลก ---
+2026-03-10 07:47:38,484 [INFO] [86T] pm=28.1261, temp=28.6
+2026-03-10 07:47:39,254 [ERROR] [86T] POST actual FAILED 500: {"message":"Unable to create actual pollution record"}
+2026-03-10 07:47:42,017 [INFO] [86T] forecast: [29.67, 29.71, 30.22, 31.0, 31.54, 31.32, 31.18]
+2026-03-10 07:47:44,484 [INFO] [86T] POST predicted OK — 7 วัน
+2026-03-10 07:47:44,500 [INFO] --- [79T] กาญจนบุรี ---
+2026-03-10 07:47:48,476 [INFO] [79T] pm=38.4891, temp=28.9
+2026-03-10 07:47:49,183 [ERROR] [79T] POST actual FAILED 500: {"message":"Unable to create actual pollution record"}
+2026-03-10 07:47:51,983 [INFO] [79T] forecast: [41.43, 42.32, 42.69, 42.56, 42.36, 42.14, 42.19]
+2026-03-10 07:47:54,487 [INFO] [79T] POST predicted OK — 7 วัน
+2026-03-10 07:47:54,487 [INFO] --- [05T] กรุงเทพมหานคร ---
+2026-03-10 07:48:06,299 [INFO] [05T] pm=27.208, temp=31.0
+2026-03-10 07:48:08,367 [ERROR] [05T] POST actual FAILED 500: {"message":"Unable to create actual pollution record"}
+2026-03-10 07:48:11,166 [INFO] [05T] forecast: [31.0, 31.63, 32.06, 31.59, 31.38, 31.54, 32.26]
+2026-03-10 07:48:13,728 [INFO] [05T] POST predicted OK — 7 วัน
+2026-03-10 07:48:13,728 [INFO] --- [87T] ตราด ---
+2026-03-10 07:48:17,485 [INFO] [87T] pm=29.3541, temp=27.7
+2026-03-10 07:48:18,218 [ERROR] [87T] POST actual FAILED 500: {"message":"Unable to create actual pollution record"}
+2026-03-10 07:48:21,019 [INFO] [87T] forecast: [28.26, 26.83, 25.92, 24.21, 23.7, 23.42, 23.4]
+2026-03-10 07:48:23,413 [INFO] [87T] POST predicted OK — 7 วัน
+2026-03-10 07:48:23,413 [INFO] --- [42T] สุราษฎร์ธานี ---
+2026-03-10 07:48:28,568 [INFO] [42T] pm=12.1818, temp=28.0
+2026-03-10 07:48:29,284 [ERROR] [42T] POST actual FAILED 500: {"message":"Unable to create actual pollution record"}
+2026-03-10 07:48:32,167 [INFO] [42T] forecast: [14.09, 15.99, 17.57, 17.55, 17.57, 17.76, 17.65]
+2026-03-10 07:48:34,618 [INFO] [42T] POST predicted OK — 7 วัน
+2026-03-10 07:48:34,618 [INFO] --- [62T] นราธิวาส ---
+2026-03-10 07:48:37,601 [INFO] [62T] pm=12.2, temp=27.8
+2026-03-10 07:48:38,352 [ERROR] [62T] POST actual FAILED 500: {"message":"Unable to create actual pollution record"}
+2026-03-10 07:48:41,250 [INFO] [62T] forecast: [13.81, 14.75, 16.31, 16.94, 17.21, 17.34, 17.4]
+2026-03-10 07:48:43,751 [INFO] [62T] POST predicted OK — 7 วัน
+2026-03-10 07:48:43,751 [INFO] === Daily Job เสร็จสิ้น ===

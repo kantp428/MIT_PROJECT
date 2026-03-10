@@ -1,0 +1,21 @@
+Model trained with best params: {'n_estimators': 250, 'max_depth': 29, 'min_samples_split': 15, 'min_samples_leaf': 6, 'max_features': 'sqrt', 'random_state': 42, 'n_jobs': -1}
+
+=== Recursive Forecasting Metrics per Horizon ===
+
+Day+1:  R²=0.8544 MSE=60.9317  RMSE=7.8059  MAE=4.0725  MBE=0.2858
+Day+2:  R²=0.7683 MSE=96.8629  RMSE=9.8419  MAE=5.3390  MBE=0.4061
+Day+3:  R²=0.7226 MSE=115.8638  RMSE=10.7640  MAE=5.9789  MBE=0.4680
+Day+4:  R²=0.6975 MSE=126.0076  RMSE=11.2253  MAE=6.2986  MBE=0.5282
+Day+5:  R²=0.6881 MSE=129.5447  RMSE=11.3818  MAE=6.5077  MBE=0.5930
+Day+6:  R²=0.6771 MSE=133.6089  RMSE=11.5589  MAE=6.6317  MBE=0.6460
+Day+7:  R²=0.6642 MSE=138.2225  RMSE=11.7568  MAE=6.7174  MBE=0.7136
+
+=== Recursive Forecasting Metrics per Horizon ===
+
+Day+1:  R²=0.8670 MSE=55.6509  RMSE=7.4600  MAE=3.8328  MBE=0.1276
+Day+2:  R²=0.7636 MSE=98.8034  RMSE=9.9400  MAE=5.2238  MBE=0.2033
+Day+3:  R²=0.7092 MSE=121.4619  RMSE=11.0210  MAE=5.9204  MBE=0.2932
+Day+4:  R²=0.6752 MSE=135.3219  RMSE=11.6328  MAE=6.2811  MBE=0.3753
+Day+5:  R²=0.6534 MSE=143.9227  RMSE=11.9968  MAE=6.5419  MBE=0.4567
+Day+6:  R²=0.6268 MSE=154.4319  RMSE=12.4271  MAE=6.7434  MBE=0.5552
+Day+7:  R²=0.5992 MSE=164.9714  RMSE=12.8441  MAE=6.9017  MBE=0.6625
