@@ -8,7 +8,13 @@ export interface AirStation {
   lastUpdated: string;
 }
 
+export interface GeoJsonFeatureCollection {
+  type: "FeatureCollection";
+  features: unknown[];
+  [key: string]: unknown;
+}
+
 export interface MapProps {
   airData: AirStation[];
-  geoData?: any;
+  geoData?: GeoJsonFeatureCollection;
 }

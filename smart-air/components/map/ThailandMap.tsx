@@ -134,7 +134,7 @@ const ThailandMap: React.FC<MapProps> = ({ airData }) => {
 
             <Circle
               center={[station.lat, station.lng]}
-              radius={8000}
+              radius={2000}
               pathOptions={{ fillColor: color, color: color, fillOpacity: 0.2 }}
             />
           </div>
